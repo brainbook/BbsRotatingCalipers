@@ -41,6 +41,12 @@
 			$this->x = $x;
 			$this->y = $y;
 		}
+		
+		public function reducePrecision()
+		{
+			$this->x = round($this->x, 5);
+			$this->y = round($this->y, 5);
+		}
 
 		public function __toString()
 		{
@@ -68,6 +74,10 @@
 		 */
 		public static function angle($v1, $v2)
 		{
+			// This fn breaks if there are too many decimal places
+			$v1->reducePrecision();
+			$v2->reducePrecision();
+			
 			$n = $v1->x*$v2->x + $v1->y*$v2->y;
 			$d = sqrt($v1->x*$v1->x + $v1->y*$v1->y)*sqrt($v2->x*$v2->x + $v2->y*$v2->y);
 			return acos($n/$d);
@@ -103,10 +113,8 @@
 		public static function intersection($p1, $v1, $p2, $v2)
 		{
 			// This fn breaks if there are too many decimal places
-			$v1->x = round($v1->x, 10);
-			$v1->y = round($v1->y, 10);
-			$v2->x = round($v2->x, 10);
-			$v2->y = round($v2->y, 10);
+			$v1->reducePrecision();
+			$v2->reducePrecision();
 
 			if ($v1->x == 0 && $v2->x == 0)
 				return false;
@@ -285,6 +293,10 @@
 				} else {
 					$pD++;
 				}
+				
+				// Prevent an infinite loop even if our precision leads to a NaN
+				if (is_nan($rotatedAngle))
+					break;
 			}
 
 			$vertices = array(
